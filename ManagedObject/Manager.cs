@@ -45,17 +45,21 @@ namespace StreamFeedstock.ManagedObject
                 m_CurrentObject = null;
                 return true;
             }
-            else if (m_Objects.TryGetValue(id, out T? obj))
+            else
             {
-                m_CurrentObject = obj;
-                return true;
+                T? obj = GetObject(id);
+                if (obj != null)
+                {
+                    m_CurrentObject = obj;
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
 
         protected T? CurrentObject => m_CurrentObject;
-        public System.Collections.Generic.List<T> Objects => m_Objects.Values.ToList();
-        public System.Collections.Generic.List<Object<T>.Info> ObjectsInfo => m_Objects.Select(pair => pair.Value.ObjectInfo).ToList();
+        public IReadOnlyList<T> Objects => m_Objects.Values.ToList().AsReadOnly();
+        public IReadOnlyList<Object<T>.Info> ObjectsInfo => m_Objects.Select(pair => pair.Value.ObjectInfo).ToList().AsReadOnly();
         public string CurrentObjectID => (m_CurrentObject != null) ? m_CurrentObject.ID : "";
 
         public void FillComboBox(ref ComboBox comboBox, bool addEmpty = true)
