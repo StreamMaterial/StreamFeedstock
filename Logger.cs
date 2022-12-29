@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Pipes;
 
 namespace StreamFeedstock
 {
@@ -6,36 +7,28 @@ namespace StreamFeedstock
     {
         private static ILogWindow? ms_LogWindow = null;
         private static readonly Dictionary<string, List<string>> ms_Logs = new();
-        private static StreamWriter? ms_LogFile = null;
         private static bool ms_LogInFile = true;
         private static readonly object ms_Lock = new();
 
-        public static void Init()
-        {
-            if (!File.Exists("./log/StreamGlass.log"))
-            {
-                Directory.CreateDirectory("./log");
-                ms_LogFile = new(File.Create("./log/StreamGlass.log"));
-            }
-            else
-                ms_LogFile = File.AppendText("./log/StreamGlass.log");
-        }
-
         public static void StopLogger()
         {
-            ms_LogWindow?.LogWindow_Close();
-            ms_LogInFile = false;
-            ms_LogFile?.Flush();
-            ms_LogFile?.Close();
+            lock (ms_Lock)
+            {
+                ms_LogWindow?.LogWindow_Close();
+                ms_LogInFile = false;
+            }
         }
 
         public static void SetLogWindow(ILogWindow? logWindow) => ms_LogWindow = logWindow;
 
-        public static IReadOnlyCollection<string> GetCategories()
+        public static IReadOnlyList<string> GetCategories()
         {
             lock (ms_Lock)
             {
-                return ms_Logs.Keys;
+                List<string> categories = new();
+                foreach (string category in ms_Logs.Keys)
+                    categories.Add(category);
+                return categories.AsReadOnly();
             }
         }
 
@@ -58,7 +51,20 @@ namespace StreamFeedstock
                 else
                     ms_Logs.Add(category, new() { log });
                 if (ms_LogInFile)
-                    ms_LogFile?.WriteLine(string.Format("--LOG [{0}]: {1}", category, log));
+                {
+                    string filename = string.Format("./log/{0}.log", category);
+                    StreamWriter fileStream;
+                    if (!File.Exists(filename))
+                    {
+                        Directory.CreateDirectory("./log");
+                        fileStream = new(File.Create(filename));
+                    }
+                    else
+                        fileStream = File.AppendText(filename);
+                    fileStream.WriteLine(log);
+                    fileStream.Flush();
+                    fileStream.Close();
+                }
             }
             ms_LogWindow?.LogWindow_Update();
         }

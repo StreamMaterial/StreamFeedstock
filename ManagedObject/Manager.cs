@@ -5,6 +5,7 @@ namespace StreamFeedstock.ManagedObject
 {
     public abstract class Manager<T> where T : Object<T>
     {
+        public event EventHandler<object>? CurrentObjectChanged;
         private readonly string m_DirPath;
         private readonly Dictionary<string, T> m_Objects = new();
         private T? m_CurrentObject = null;

@@ -87,6 +87,18 @@
             return false;
         }
 
+        public static bool Clear(dynamic canalID)
+        {
+            int id = Convert.ToInt32(canalID);
+            Canal? canal = GetCanal(id);
+            if (canal != null)
+            {
+                canal.Clear();
+                return true;
+            }
+            return false;
+        }
+
         public static bool Emit<T>(dynamic canalID, T args)
         {
             int id = Convert.ToInt32(canalID);

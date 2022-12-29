@@ -31,7 +31,7 @@ namespace StreamFeedstock.Controls
                 Background = topBarBackground;
             if (palette.TryGetColor(TextBrushPaletteKey, out var topBarText))
                 Foreground = topBarText;
-            foreach (System.Windows.Controls.MenuItem item in Items)
+            foreach (object item in Items)
             {
                 if (item is MenuItem child)
                     child.Update(palette, translation);

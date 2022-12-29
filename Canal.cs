@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StreamFeedstock
+﻿namespace StreamFeedstock
 {
     public class Canal
     {
@@ -76,6 +70,17 @@ namespace StreamFeedstock
                 lock (m_Lock) { foreach (TriggerListener listener in m_TriggerListeners) listener(Convert.ToInt32(m_Id)); }
                 Logger.Log("Canal", string.Format("Stop iterate on {0}", m_Id));
             });
+        }
+
+        public void Clear()
+        {
+            Logger.Log("Canal", string.Format("Start clearing on {0}", m_Id));
+            lock (m_Lock)
+            {
+                m_MessageListeners.Clear();
+                m_TriggerListeners.Clear();
+            }
+            Logger.Log("Canal", string.Format("Stop clearing on {0}", m_Id));
         }
     }
 }
